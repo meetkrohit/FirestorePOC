@@ -13,6 +13,10 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.storage.FirebaseStorage;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -24,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayoutManager layoutManager;
     private FirebaseAdapter firebaseAdapter;
     DocumentReference reference;
+    DocumentReference ref;
+    DocumentReference update;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,30 +38,38 @@ public class MainActivity extends AppCompatActivity {
         rv = (RecyclerView) findViewById(R.id.vds_rv_channels);
         layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         rv.setLayoutManager(layoutManager);
-        getData("");
+        getData();
     }
 
-    private void getData(String s) {
-        reference = FirebaseFirestore.getInstance().collection("Test2")
-                .document("nfAWl9uP2EQt85emS7JT");
+    private void getData() {
+        reference = FirebaseFirestore.getInstance().collection("TestTeam")
+                .document("dev").collection("teamChannels").document("iC6RDVzwDULR1X");
         reference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
 
                 if (documentSnapshot != null && documentSnapshot.exists()) {
                     try {
-                        ArrayList jsonArray =  (ArrayList)documentSnapshot.getData().get("details");
-                        for (int i =0;i<jsonArray.size();i++){
-                            DocumentReference reference = (DocumentReference)jsonArray.get(i);
-                            getData(reference.getPath());
-                            Log.d("Ref",""+reference.getPath());
+                        ArrayList jsonArray = (ArrayList) documentSnapshot.getData().get("channels");
+                        for (int i = 0; i < jsonArray.size(); i++) {
+                            ref = (DocumentReference) jsonArray.get(i);
+                            ref.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                                @Override
+                                public void onEvent(@Nullable DocumentSnapshot documentSnapshot,
+                                                    @Nullable FirebaseFirestoreException e) {
+
+                                    JSONObject jsonObject = new JSONObject(documentSnapshot.getData());
+                                    try {
+                                        JSONObject jsonObject1 = jsonObject.getJSONObject("channelDetails");
+                                        Log.d("Reference", "" + jsonObject1.optString("name"));
+                                    } catch (JSONException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                }
+                            });
+                            //getDataRefernce(ref.getPath());
+
                         }
-
-                        /*ref = jsonObject.optString("details");
-                        Log.d("docs", "" + documentSnapshot.get("details"));
-                        getData(ref);*/
-
-
 
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -64,7 +78,12 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
         setFirebaseAdapter();
+    }
+
+    private void getDataRefernce(String path) {
+
     }
 
     private void setFirebaseAdapter() {
