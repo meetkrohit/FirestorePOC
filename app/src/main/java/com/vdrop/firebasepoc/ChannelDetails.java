@@ -11,6 +11,10 @@ public class ChannelDetails {
     @SerializedName("name")
     private String name;
 
+    public ChannelDetails() {
+
+    }
+
     public ChannelDetails(String bannerImage, String description, String name) {
         this.bannerImage = bannerImage;
         this.description = description;
