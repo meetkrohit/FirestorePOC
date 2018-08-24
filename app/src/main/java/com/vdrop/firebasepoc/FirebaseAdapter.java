@@ -27,8 +27,9 @@ public class FirebaseAdapter extends RecyclerView.Adapter<FirebaseAdapter.Fireba
     private ImageView bannerImage;
     private TextView description;
 
-    public FirebaseAdapter(Context context) {
+    public FirebaseAdapter(Context context, ArrayList<ChannelDetails> channelDetailsArrayList) {
         this.context = context;
+        this.channelDetailsList = channelDetailsArrayList;
     }
 
     @NonNull
@@ -51,8 +52,10 @@ public class FirebaseAdapter extends RecyclerView.Adapter<FirebaseAdapter.Fireba
         return channelDetailsList.size();
     }
 
-    public void setData(ArrayList<ChannelDetails> channelDetailsList) {
+    public void setData(ArrayList<ChannelDetails> channelDetailsList, int pos) {
         this.channelDetailsList = channelDetailsList;
+        notifyItemChanged(pos);
+        //notifyItemInserted(pos);
     }
 
     public class FirebaseViewHolder extends RecyclerView.ViewHolder {

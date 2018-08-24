@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -30,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     DocumentReference update;
     //ChannelDetails channelDetails;
     ArrayList<ChannelDetails> channelDetailsList;
+    ArrayList<ChannelDetails> channelDetailsListR;
+    ArrayList<String> channelId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         final ArrayList jsonArray = (ArrayList) documentSnapshot.getData().get("channels");
                         channelDetailsList = new ArrayList<>();
-                        channelDetailsList.clear();
                         for (int i = 0; i < jsonArray.size(); i++) {
                             ref = (DocumentReference) jsonArray.get(i);
                             ref.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -63,14 +65,28 @@ public class MainActivity extends AppCompatActivity {
                                     JSONObject jsonObject = new JSONObject(documentSnapshot.getData());
                                     try {
                                         JSONObject jsonObject1 = jsonObject.getJSONObject("channelDetails");
-                                        Log.d("Reference", "" + jsonObject1.optString("name"));
+                                        //Log.d("Reference", "" + jsonObject1.optString("name"));
+                                        if (channelDetailsList.size() == jsonArray.size()){
+                                            for (int j = 0; j < channelDetailsList.size(); j++){
+                                                if (channelDetailsList.get(j).getId().equals(jsonObject1.optString("id"))){
+                                                            channelDetailsList.get(j).setName(jsonObject1.optString("name"));
+                                                            channelDetailsList.get(j).setDescription(jsonObject1.optString("description"));
+                                                            channelDetailsList.get(j).setBannerImage(jsonObject1.optString("bannerImage"));
+                                                            setFirebaseAdapter(channelDetailsList, true, j);
+                                                }
+                                            }
 
-                                        ChannelDetails channelDetails = new ChannelDetails();
-                                        channelDetails.setName(jsonObject1.optString("name"));
-                                        channelDetails.setDescription(jsonObject1.optString("description"));
-                                        channelDetails.setBannerImage(jsonObject1.optString("bannerImage"));
-                                        channelDetailsList.add(channelDetails);
-                                        setFirebaseAdapter(channelDetailsList);
+                                        } else {
+                                            ChannelDetails channelDetails = new ChannelDetails();
+                                            channelDetails.setName(jsonObject1.optString("name"));
+                                            channelDetails.setDescription(jsonObject1.optString("description"));
+                                            channelDetails.setBannerImage(jsonObject1.optString("bannerImage"));
+                                            channelDetails.setId(jsonObject1.optString("id"));
+                                            channelDetailsList.add(channelDetails);
+                                            Collections.reverse(channelDetailsList);
+                                            setFirebaseAdapter(channelDetailsList, false, 0);
+                                        }
+
 
 
                                     } catch (JSONException e1) {
@@ -78,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                             });
-                            //getDataRefernce(ref.getPath());
 
                         }
 
@@ -94,15 +109,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void getDataRefernce(String path) {
+    private void setFirebaseAdapter(ArrayList<ChannelDetails> channelDetailsListI, boolean status, int pos) {
+        if (status){
+            firebaseAdapter.setData(channelDetailsListI,pos);
+        } else {
+            firebaseAdapter = new FirebaseAdapter(this,channelDetailsListI);
+            rv.setAdapter(firebaseAdapter);
+            firebaseAdapter.notifyDataSetChanged();
+        }
 
-    }
-
-    private void setFirebaseAdapter(ArrayList<ChannelDetails> channelDetailsListI) {
-        firebaseAdapter = new FirebaseAdapter(this);
-        firebaseAdapter.setData(channelDetailsListI);
-        rv.setAdapter(firebaseAdapter);
-        firebaseAdapter.notifyDataSetChanged();
 
     }
 }

@@ -10,6 +10,16 @@ public class ChannelDetails {
     private String description;
     @SerializedName("name")
     private String name;
+    @SerializedName("id")
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public ChannelDetails() {
 
